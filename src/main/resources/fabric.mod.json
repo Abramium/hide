@@ -2,25 +2,16 @@
   "schemaVersion": 1,
   "id": "hide",
   "version": "${version}",
-
-  "name": "hide",
-  "description": "",
-  "authors": [],
-  "contact": {},
-
   "license": "BSD-3-Clause",
-  "icon": "assets/hide/icon.png",
-
   "environment": "server",
-  "entrypoints": {},
-
-      "mixins": [
-        "hide.mixins.json"
-      ],
-
+  "entrypoints": {
+    "server": [
+      "ru.abramium.hide.Hide"
+    ]
+  },
   "depends": {
     "fabricloader": ">=${loader_version}",
-        "fabric": "*",
+    "fabric": "*",
     "minecraft": "${minecraft_version}"
   }
 }
