@@ -14,6 +14,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 
+import static net.minecraft.entity.effect.StatusEffects.INVISIBILITY;
 import static net.minecraft.scoreboard.AbstractTeam.VisibilityRule.NEVER;
 
 @Environment(EnvType.SERVER)
@@ -26,7 +27,8 @@ public class Hide implements DedicatedServerModInitializer {
         ServerLifecycleEvents.SERVER_STARTED.register(this::onServerStart);
         ServerPlayConnectionEvents.JOIN.register(this::onPlayerJoin);
         UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
-            if (entity instanceof PlayerEntity targetPlayer) {
+            if (entity instanceof PlayerEntity targetPlayer
+                    && !targetPlayer.hasStatusEffect(INVISIBILITY)) {
                 var name = targetPlayer.getName().getString();
                 player.sendMessage(Text.of(name), true);
                 return ActionResult.SUCCESS;
@@ -37,8 +39,9 @@ public class Hide implements DedicatedServerModInitializer {
 
     private void onServerStart(MinecraftServer server) {
         if (server.getScoreboard().getTeam(TEAM_NAME) == null) {
-            server.getScoreboard().addTeam(TEAM_NAME)
-                    .setNameTagVisibilityRule(NEVER);
+            var team = server.getScoreboard().addTeam(TEAM_NAME);
+            team.setShowFriendlyInvisibles(false);
+            team.setNameTagVisibilityRule(NEVER);
         }
     }
 
