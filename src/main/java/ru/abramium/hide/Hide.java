@@ -5,11 +5,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -24,34 +21,36 @@ public class Hide implements DedicatedServerModInitializer {
 
     @Override
     public void onInitializeServer() {
-        ServerLifecycleEvents.SERVER_STARTED.register(this::onServerStart);
-        ServerPlayConnectionEvents.JOIN.register(this::onPlayerJoin);
-        UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
-            if (entity instanceof PlayerEntity targetPlayer
-                    && !targetPlayer.hasStatusEffect(INVISIBILITY)) {
-                var name = targetPlayer.getName().getString();
-                player.sendMessage(Text.of(name), true);
-                return ActionResult.SUCCESS;
+        registerInitTeam();
+        registerAddPlayerToTeamOnJoin();
+        registerShowNameTagOnClick();
+    }
+
+    private void registerInitTeam() {
+        ServerLifecycleEvents.SERVER_STARTED.register((server) -> {
+            var team = server.getScoreboard().getTeam(TEAM_NAME);
+            if (team == null || team.shouldShowFriendlyInvisibles()) {
+                team = server.getScoreboard().addTeam(TEAM_NAME);
+                team.setShowFriendlyInvisibles(false);
+                team.setNameTagVisibilityRule(NEVER);
             }
-            return ActionResult.PASS;
         });
     }
 
-    private void onServerStart(MinecraftServer server) {
-        if (server.getScoreboard().getTeam(TEAM_NAME) == null) {
-            var team = server.getScoreboard().addTeam(TEAM_NAME);
-            team.setShowFriendlyInvisibles(false);
-            team.setNameTagVisibilityRule(NEVER);
-        }
+    private void registerAddPlayerToTeamOnJoin() {
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            ServerPlayerEntity player = handler.getPlayer();
+            if (player.getScoreboardTeam() == null || !player.getScoreboardTeam().getName().equals(TEAM_NAME))
+                server.getScoreboard().addScoreHolderToTeam(player.getNameForScoreboard(), server.getScoreboard().getTeam(TEAM_NAME));
+        });
     }
 
-    private void onPlayerJoin(ServerPlayNetworkHandler handler, PacketSender sender, MinecraftServer server) {
-        ServerPlayerEntity player = handler.getPlayer();
-        if (player.getScoreboardTeam() == null || !player.getScoreboardTeam().getName().equals(TEAM_NAME)) {
-            server.getScoreboard().addScoreHolderToTeam(
-                    player.getNameForScoreboard(),
-                    server.getScoreboard().getTeam(TEAM_NAME)
-            );
-        }
+    private void registerShowNameTagOnClick() {
+        UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
+            if (entity instanceof PlayerEntity targetPlayer && !targetPlayer.hasStatusEffect(INVISIBILITY)) {
+                player.sendMessage(Text.of(targetPlayer.getName().getString()), true);
+                return ActionResult.SUCCESS;
+            } else return ActionResult.PASS;
+        });
     }
 }

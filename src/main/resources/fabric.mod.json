@@ -4,6 +4,9 @@
   "version": "${version}",
   "license": "BSD-3-Clause",
   "environment": "server",
+  "mixins": [
+    "hide.mixin.json"
+  ],
   "entrypoints": {
     "server": [
       "ru.abramium.hide.Hide"
