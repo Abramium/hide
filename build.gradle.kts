@@ -2,6 +2,7 @@ plugins {
     id("com.modrinth.minotaur") version "2.+"
     id("fabric-loom") version "1.6-SNAPSHOT"
     id("maven-publish")
+    id("java")
 }
 
 version = project.extra["mod_version"] as String
@@ -16,6 +17,8 @@ dependencies {
     mappings("net.fabricmc:yarn:${project.extra["yarn_mappings"]}:v2")
     modImplementation("net.fabricmc:fabric-loader:${project.extra["loader_version"]}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project.extra["fabric_version"]}")
+    annotationProcessor("org.projectlombok:lombok:1.18.34")
+    compileOnly("org.projectlombok:lombok:1.18.34")
 }
 
 loom {
