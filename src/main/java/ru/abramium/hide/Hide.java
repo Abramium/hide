@@ -11,19 +11,23 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 
+import java.util.Properties;
+
 import static net.minecraft.entity.effect.StatusEffects.INVISIBILITY;
 import static net.minecraft.scoreboard.AbstractTeam.VisibilityRule.NEVER;
 
 @Environment(EnvType.SERVER)
 public class Hide implements DedicatedServerModInitializer {
 
+    public static final Properties PROPERTIES = Config.getProperties();
     private static final String TEAM_NAME = "ru.abramium.hide";
 
     @Override
     public void onInitializeServer() {
         registerInitTeam();
         registerAddPlayerToTeamOnJoin();
-        registerShowNameTagOnClick();
+        if ("true".equals(PROPERTIES.getProperty("showNameTagOnClick")))
+            registerShowNameTagOnClick();
     }
 
     private void registerInitTeam() {
