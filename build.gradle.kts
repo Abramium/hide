@@ -18,6 +18,10 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project.extra["fabric_version"]}")
 }
 
+loom {
+    accessWidenerPath.set(file("src/main/resources/hide.accesswidener"))
+}
+
 tasks.processResources {
     inputs.property("version", project.version)
     inputs.property("minecraft_version", project.extra["minecraft_version"])
