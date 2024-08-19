@@ -45,7 +45,7 @@ public class Hide implements DedicatedServerModInitializer {
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayerEntity player = handler.getPlayer();
             if (player.getScoreboardTeam() == null || !player.getScoreboardTeam().getName().equals(TEAM_NAME))
-                server.getScoreboard().addScoreHolderToTeam(player.getNameForScoreboard(), server.getScoreboard().getTeam(TEAM_NAME));
+                server.getScoreboard().addPlayerToTeam(player.getEntityName(), server.getScoreboard().getTeam(TEAM_NAME));
         });
     }
 
